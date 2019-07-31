@@ -109,14 +109,9 @@ namespace TSKT
                     }
                     else if (currentChar == '}')
                     {
-                        if (builder.ToString().Trim(trimCharacters).Length > 0)
-                        {
-                            UnityEngine.Assertions.Assert.IsTrue(false, "syntax error! : " + builder.ToString().Trim(trimCharacters));
-                        }
-                        if (!requestCloseBracket)
-                        {
-                            UnityEngine.Assertions.Assert.IsTrue(false, "予期しない括弧閉じです : " + src);
-                        }
+                        Debug.Assert(builder.ToString().Trim(trimCharacters).Length == 0,
+                            "syntax error! : " + builder.ToString().Trim(trimCharacters));
+                        Debug.Assert(requestCloseBracket, "予期しない括弧閉じです : " + src);
                         break;
                     }
                     else if (currentChar == ';')
@@ -178,7 +173,7 @@ namespace TSKT
                     else if (currentChar == '"')
                     {
                         var end = src.IndexOf('"', index + 1);
-                        UnityEngine.Assertions.Assert.AreNotEqual(-1, end);
+                        Debug.Assert(end != -1);
                         if (end >= 0)
                         {
                             builder.Append(src.Substring(index, end - index + 1));
@@ -194,10 +189,7 @@ namespace TSKT
             }
             if (index == src.Length)
             {
-                if (requestCloseBracket)
-                {
-                    UnityEngine.Assertions.Assert.IsTrue(false, "括弧が閉じられていません");
-                }
+                Debug.Assert(!requestCloseBracket, "括弧が閉じられていません");
             }
             return index;
         }
@@ -211,7 +203,7 @@ namespace TSKT
                 return null;
             }
             bool Func(Nml _) => (_.name.ToLowerInvariant() == name.ToLowerInvariant());
-            UnityEngine.Assertions.Assert.IsTrue(children.Count(Func) <= 1, "has multi children : " + name);
+            Debug.Assert(children.Count(Func) <= 1, "has multi children : " + name);
             return children.FirstOrDefault(Func);
         }
 
@@ -226,8 +218,8 @@ namespace TSKT
 
         public T GetParameter<T>(string name)
         {
-            UnityEngine.Assertions.Assert.IsNotNull(SearchChild(name), "not found : " + FullPath + ", " + name);
-            UnityEngine.Assertions.Assert.IsNotNull(SearchChild(name).Parameters, "not found : " + FullPath + ", " + name);
+            Debug.Assert(SearchChild(name) != null, "not found : " + FullPath + ", " + name);
+            Debug.Assert(SearchChild(name).Parameters != null, "not found : " + FullPath + ", " + name);
 
             return TryGetParameter(name, default(T));
         }
@@ -252,11 +244,12 @@ namespace TSKT
                 return defaultValue;
             }
 
-            UnityEngine.Assertions.Assert.AreEqual(attr.Parameters.Count, 1, "パラメータ数が不正です : " + string.Join(", ", attr.Parameters.ToArray()));
+            Debug.Assert(attr.Parameters.Count == 1,
+                "パラメータ数が不正です : " + string.Join(", ", attr.Parameters.ToArray()));
 
             if (typeof(T).IsEnum)
             {
-                UnityEngine.Assertions.Assert.IsFalse(string.IsNullOrEmpty(attr.parameters[0]), "parameter is null or empty in " + name);
+                Debug.Assert(!string.IsNullOrEmpty(attr.parameters[0]), "parameter is null or empty in " + name);
                 return (T)System.Enum.Parse(typeof(T), attr.parameters[0]);
             }
 
@@ -265,7 +258,7 @@ namespace TSKT
 
         public void CheckIfAccessedAllElements()
         {
-            UnityEngine.Assertions.Assert.IsTrue(accessed, "error: ignored child " + FullPath);
+            Debug.Assert(accessed, "error: ignored child " + FullPath);
             if (children != null)
             {
                 foreach (var it in children)
