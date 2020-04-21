@@ -230,18 +230,16 @@ namespace TSKT
             return children.Where(_ => _.name.ToLowerInvariant() == name.ToLowerInvariant());
         }
 
-        public T TryGetParameter<T>(string name, T defaultValue)
+
+        public bool TryGetParameter<T>(string name, out T result)
         {
             accessed = true;
             var attr = SearchChild(name);
-            if (attr == null)
-            {
-                return defaultValue;
-            }
 
-            if (attr.Parameters == null)
+            if (attr?.Parameters == null)
             {
-                return defaultValue;
+                result = default;
+                return false;
             }
 
             Debug.Assert(attr.Parameters.Count == 1,
@@ -250,10 +248,27 @@ namespace TSKT
             if (typeof(T).IsEnum)
             {
                 Debug.Assert(!string.IsNullOrEmpty(attr.parameters[0]), "parameter is null or empty in " + name);
-                return (T)System.Enum.Parse(typeof(T), attr.parameters[0]);
+                result = (T)System.Enum.Parse(typeof(T), attr.parameters[0]);
+                return true;
+            }
+            if (typeof(T) == typeof(bool))
+            {
+                result = (T)((object)bool.Parse(attr.parameters[0]));
+                return true;
             }
 
-            return (T)System.Convert.ChangeType(attr.parameters[0], typeof(T));
+            result = (T)System.Convert.ChangeType(attr.parameters[0], typeof(T));
+            return true;
+
+        }
+
+        public T TryGetParameter<T>(string name, T defaultValue)
+        {
+            if (TryGetParameter<T>(name, out var value))
+            {
+                return value;
+            }
+            return defaultValue;
         }
 
         public void CheckIfAccessedAllElements()
