@@ -1,11 +1,7 @@
-# Unty_TSKT_Nml
+# install
 
-Packages/manifest.json
+Unity Package Manager
 
-```json
-{
-  "dependencies": {
-    "com.github.enue.tskt_nml": "https://github.com/enue/Unity_TSKT_Nml.git",
-  }
-}
-```
+add package from git url
+
++ `https://github.com/enue/Unity_TSKT_Nml.git?path=Assets/Package`
